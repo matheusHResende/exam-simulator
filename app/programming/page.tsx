@@ -274,14 +274,18 @@ export default function ProgrammingPage() {
               Detalhamento por problema
             </p>
             {problemSummaries.map((s, i) => (
-              <div
+              <button
                 key={i}
-                className={`flex items-center justify-between p-5 rounded-2xl border ${
+                onClick={() => {
+                  setCurrentIndex(i);
+                  setShowSummary(false);
+                }}
+                className={`w-full flex items-center justify-between p-5 rounded-2xl border text-left transition-colors cursor-pointer hover:shadow-sm ${
                   s.allPassed
-                    ? 'border-emerald-200 bg-emerald-50/60'
+                    ? 'border-emerald-200 bg-emerald-50/60 hover:bg-emerald-50'
                     : s.notRun
-                    ? 'border-slate-200 bg-slate-50'
-                    : 'border-red-200 bg-red-50/60'
+                    ? 'border-slate-200 bg-slate-50 hover:bg-slate-100'
+                    : 'border-red-200 bg-red-50/60 hover:bg-red-50'
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -308,7 +312,7 @@ export default function ProgrammingPage() {
                 >
                   {s.notRun ? '—' : `${s.passed}/${s.total}`}
                 </span>
-              </div>
+              </button>
             ))}
           </div>
 
@@ -475,6 +479,7 @@ export default function ProgrammingPage() {
               onNext={() =>
                 setCurrentIndex((i) => Math.min(problemSet.problems.length - 1, i + 1))
               }
+              onGoToSummary={() => setShowSummary(true)}
               onFinish={handleFinish}
               onResultsChange={handleResultsChange}
             />

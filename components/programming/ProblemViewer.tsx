@@ -10,6 +10,7 @@ interface ProblemViewerProps {
   storageKey: string;
   onPrev: () => void;
   onNext: () => void;
+  onGoToSummary: () => void;
   onFinish: () => void;
   onResultsChange: (index: number, results: TestResult[] | null) => void;
 }
@@ -21,6 +22,7 @@ export default function ProblemViewer({
   storageKey,
   onPrev,
   onNext,
+  onGoToSummary,
   onFinish,
   onResultsChange,
 }: ProblemViewerProps) {
@@ -30,9 +32,17 @@ export default function ProblemViewer({
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <span className="bg-indigo-100 text-indigo-700 text-xs font-black px-4 py-2 rounded-full uppercase tracking-widest">
-          Problema {index + 1} de {total}
-        </span>
+        <div className="flex items-center gap-3">
+          <span className="bg-indigo-100 text-indigo-700 text-xs font-black px-4 py-2 rounded-full uppercase tracking-widest">
+            Problema {index + 1} de {total}
+          </span>
+          <button
+            onClick={onGoToSummary}
+            className="text-slate-500 hover:text-slate-800 text-xs font-bold transition-colors underline decoration-slate-300 underline-offset-4"
+          >
+            Ir para Resumo
+          </button>
+        </div>
         <div className="flex gap-2">
           <button
             onClick={onPrev}
