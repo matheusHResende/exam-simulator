@@ -103,10 +103,10 @@ export default function ProblemViewer({
       </div>
 
       {/* Main Grid Workspace */}
-      <PanelGroup direction="horizontal" className="flex-1 min-h-0 bg-transparent gap-2 md:gap-4 flex justify-stretch overflow-visible">
+      <PanelGroup direction="horizontal" className="flex-1 min-h-0 bg-white rounded-l-[2rem] rounded-r-none shadow-sm border border-slate-200 overflow-hidden">
         
         {/* Left Column: Problem description and test cases */}
-        <Panel defaultSize={45} minSize={20} className="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-y-auto">
+        <Panel defaultSize={45} minSize={20} className="bg-white overflow-y-auto">
           <div className="p-8 md:p-10">
             <h2 className="text-2xl font-black text-slate-900 mb-6">{problem.title}</h2>
 
@@ -159,12 +159,12 @@ export default function ProblemViewer({
         </Panel>
 
         {/* Resize Handle */}
-        <PanelResizeHandle className="w-4 bg-transparent hover:bg-violet-100/50 active:bg-violet-100 transition-colors cursor-col-resize flex items-center justify-center rounded-full group shrink-0">
-          <div className="h-10 w-1 bg-slate-200 group-hover:bg-violet-400 rounded-full transition-colors" />
+        <PanelResizeHandle className="w-2 bg-slate-50 border-x border-slate-200 hover:bg-violet-100 active:bg-violet-200 transition-colors cursor-col-resize flex items-center justify-center shrink-0">
+          <div className="h-8 w-0.5 bg-slate-300 rounded-full" />
         </PanelResizeHandle>
 
         {/* Right Column: Python IDE */}
-        <Panel defaultSize={55} minSize={30} className="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden flex flex-col min-h-0 relative">
+        <Panel defaultSize={55} minSize={30} className="bg-white flex flex-col min-h-0 relative">
           <CodeRunner
             ref={codeRunnerRef}
             testCases={problem.testCases}
