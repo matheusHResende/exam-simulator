@@ -208,19 +208,18 @@ export default function ProgrammingPage() {
           <div className="flex items-center justify-between mb-8">
             <Link
               href="/"
-              className="text-slate-500 hover:text-slate-800 font-bold flex items-center transition-colors"
+              className="text-slate-400 hover:text-white font-bold flex items-center transition-colors text-sm"
             >
-              <ChevronLeft className="w-5 h-5 mr-1" /> Início
+              <ChevronLeft className="w-4 h-4 mr-1" /> Sair
             </Link>
             <div className="flex items-center gap-3">
-              <div className="bg-violet-600 w-10 h-10 rounded-xl flex items-center justify-center shadow-lg shadow-violet-200">
-                <Code2 className="w-5 h-5 text-white" />
+              <div className="bg-violet-600 w-8 h-8 rounded-lg flex items-center justify-center shadow-lg shadow-violet-900/50">
+                <Code2 className="w-4 h-4 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-black text-slate-900 leading-none">
-                  Prova de Programação
+                <h1 className="text-sm font-black text-white leading-none">
+                  {problemSet.title}
                 </h1>
-                <p className="text-xs text-slate-400 font-bold mt-0.5">{problemSet.title}</p>
               </div>
             </div>
             <div className="w-24" />
@@ -352,10 +351,10 @@ export default function ProgrammingPage() {
 
   // ─── Main exam screen ─────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-8">
-      <div className="max-w-[1400px] mx-auto">
+    <div className="h-screen w-full bg-slate-900 flex flex-col text-slate-200">
+      <div className="flex-1 flex flex-col min-h-0 w-full p-2 md:p-4 pb-0">
         {/* Top bar */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-2 shrink-0 px-2">
           <Link
             href="/"
             className="text-slate-500 hover:text-slate-800 font-bold flex items-center transition-colors"
@@ -459,30 +458,34 @@ export default function ProgrammingPage() {
         ) : (
           <>
             {/* File badge */}
-            <div className="bg-violet-50 border border-violet-200 p-3 rounded-xl flex items-center mb-6">
-              <FileText className="w-5 h-5 mr-3 text-violet-600" />
-              <div className="text-left">
-                <p className="font-bold text-sm text-violet-800 leading-none">{fileName}</p>
-                <p className="text-xs text-violet-500 mt-0.5">
-                  {problemSet.problems.length} problema
-                  {problemSet.problems.length !== 1 ? 's' : ''}
-                </p>
+            <div className="bg-slate-800 border border-slate-700 p-3 rounded-xl flex items-center mb-0 shrink-0">
+              <FileText className="w-5 h-5 mr-3 text-slate-400" />
+              <div className="text-left flex-1 flex items-center justify-between">
+                <div>
+                  <p className="font-bold text-sm text-slate-200 leading-none">{fileName}</p>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    {problemSet.problems.length} problema
+                    {problemSet.problems.length !== 1 ? 's' : ''}
+                  </p>
+                </div>
               </div>
             </div>
 
-            <ProblemViewer
-              problem={problemSet.problems[currentIndex]}
-              index={currentIndex}
-              total={problemSet.problems.length}
-              storageKey={storageKey}
-              onPrev={() => setCurrentIndex((i) => Math.max(0, i - 1))}
-              onNext={() =>
-                setCurrentIndex((i) => Math.min(problemSet.problems.length - 1, i + 1))
-              }
-              onGoToSummary={() => setShowSummary(true)}
-              onFinish={handleFinish}
-              onResultsChange={handleResultsChange}
-            />
+            <div className="flex-1 min-h-0 mt-2">
+              <ProblemViewer
+                problem={problemSet.problems[currentIndex]}
+                index={currentIndex}
+                total={problemSet.problems.length}
+                storageKey={storageKey}
+                onPrev={() => setCurrentIndex((i) => Math.max(0, i - 1))}
+                onNext={() =>
+                  setCurrentIndex((i) => Math.min(problemSet.problems.length - 1, i + 1))
+                }
+                onGoToSummary={() => setShowSummary(true)}
+                onFinish={handleFinish}
+                onResultsChange={handleResultsChange}
+              />
+            </div>
           </>
         )}
       </div>

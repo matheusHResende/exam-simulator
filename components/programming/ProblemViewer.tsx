@@ -1,7 +1,9 @@
+import { useRef, useState } from 'react';
 import type { Problem } from '@/types/programming';
-import { ChevronLeft, ChevronRight, Flag } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Flag, Play, Loader2 } from 'lucide-react';
+import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import CodeRunner from './CodeRunner';
-import type { TestResult } from './CodeRunner';
+import type { TestResult, CodeRunnerRef } from './CodeRunner';
 
 interface ProblemViewerProps {
   problem: Problem;
@@ -27,9 +29,12 @@ export default function ProblemViewer({
   onResultsChange,
 }: ProblemViewerProps) {
   const isLast = index === total - 1;
+  const codeRunnerRef = useRef<CodeRunnerRef>(null);
+  const [isRunning, setIsRunning] = useState(false);
+  const [loadingPyodide, setLoadingPyodide] = useState(false);
 
   return (
-    <div className="flex flex-col h-full lg:h-[calc(100vh-140px)] gap-6">
+    <div className="flex flex-col h-full gap-2">
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 shrink-0">
         <div className="flex items-center gap-3">
@@ -44,6 +49,30 @@ export default function ProblemViewer({
           </button>
         </div>
         <div className="flex gap-2">
+          <button
+            onClick={() => codeRunnerRef.current?.runCode()}
+            disabled={isRunning || problem.testCases.length === 0}
+            className={`flex items-center gap-2 px-5 py-2 rounded-xl font-black text-sm transition-all shadow-sm ${
+              isRunning || problem.testCases.length === 0
+                ? 'bg-violet-200 text-violet-400 cursor-not-allowed'
+                : 'bg-violet-600 text-white hover:bg-violet-700 shadow-violet-200'
+            }`}
+          >
+            {isRunning ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                {loadingPyodide ? 'Carregando Python…' : 'Executando…'}
+              </>
+            ) : (
+              <>
+                <Play className="w-4 h-4" />
+                Executar
+              </>
+            )}
+          </button>
+
+          <div className="w-px bg-slate-200 mx-2" />
+
           <button
             onClick={onPrev}
             disabled={index === 0}
@@ -74,10 +103,10 @@ export default function ProblemViewer({
       </div>
 
       {/* Main Grid Workspace */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 min-h-0">
+      <PanelGroup direction="horizontal" className="flex-1 min-h-0 bg-slate-950 rounded-[2rem] overflow-hidden border border-slate-700 shadow-xl">
         
         {/* Left Column: Problem description and test cases */}
-        <div className="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-y-auto min-h-[400px]">
+        <Panel defaultSize={40} minSize={20} className="bg-white overflow-y-auto">
           <div className="p-8 md:p-10">
             <h2 className="text-2xl font-black text-slate-900 mb-6">{problem.title}</h2>
 
@@ -127,19 +156,29 @@ export default function ProblemViewer({
               </div>
             )}
           </div>
-        </div>
+        </Panel>
+
+        {/* Resize Handle */}
+        <PanelResizeHandle className="w-2 bg-slate-900 hover:bg-violet-600/50 active:bg-violet-600 transition-colors cursor-col-resize flex items-center justify-center border-x border-slate-800">
+          <div className="h-10 w-0.5 bg-slate-600 rounded-full" />
+        </PanelResizeHandle>
 
         {/* Right Column: Python IDE */}
-        <div className="bg-white rounded-[2rem] shadow-sm border border-slate-200 p-8 md:p-10 flex flex-col overflow-y-auto min-h-[500px]">
+        <Panel defaultSize={60} minSize={30} className="flex flex-col min-h-0 bg-[#1e1e1e]">
           <CodeRunner
+            ref={codeRunnerRef}
             testCases={problem.testCases}
             problemIndex={index}
             storageKey={storageKey}
             onResultsChange={(results) => onResultsChange(index, results)}
+            onRunningStateChange={(running, pyloading) => {
+              setIsRunning(running);
+              setLoadingPyodide(pyloading);
+            }}
           />
-        </div>
+        </Panel>
         
-      </div>
+      </PanelGroup>
     </div>
   );
 }

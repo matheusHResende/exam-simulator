@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, forwardRef, useImperativeHandle } from 'react';
 import Editor from '@monaco-editor/react';
-import { Play, CheckCircle, XCircle, Loader2, AlertTriangle, RotateCcw } from 'lucide-react';
+import { CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import type { TestCase } from '@/types/programming';
 
 declare global {
@@ -28,6 +29,13 @@ interface CodeRunnerProps {
   problemIndex: number;
   storageKey: string;
   onResultsChange?: (results: TestResult[] | null) => void;
+  onRunningStateChange?: (isRunning: boolean, loadingPyodide: boolean) => void;
+}
+
+export interface CodeRunnerRef {
+  runCode: () => Promise<void>;
+  resetCode: () => void;
+  hasCodeChanged: boolean;
 }
 
 const STARTER_CODE = `# Escreva sua solução aqui\n`;
@@ -129,7 +137,7 @@ _stdout_buf.getvalue()
   return { stdout: result ?? '', stderr };
 }
 
-export default function CodeRunner({ testCases, problemIndex, storageKey, onResultsChange }: CodeRunnerProps) {
+const CodeRunner = forwardRef<CodeRunnerRef, CodeRunnerProps>(({ testCases, problemIndex, storageKey, onResultsChange, onRunningStateChange }, ref) => {
   const codeKey = makeCodeKey(storageKey, problemIndex);
   const resultsKey = makeResultsKey(storageKey, problemIndex);
 
@@ -143,6 +151,11 @@ export default function CodeRunner({ testCases, problemIndex, storageKey, onResu
   const [loadingPyodide, setLoadingPyodide] = useState(false);
   const [globalError, setGlobalError] = useState('');
   const prevIndexRef = useRef(problemIndex);
+
+  // Sync state upward when it changes
+  useEffect(() => {
+    onRunningStateChange?.(isRunning, loadingPyodide);
+  }, [isRunning, loadingPyodide, onRunningStateChange]);
 
   // Notify parent of restored results on mount
   useEffect(() => {
@@ -229,71 +242,61 @@ export default function CodeRunner({ testCases, problemIndex, storageKey, onResu
   const totalCount = results?.length ?? 0;
   const allPassed = results !== null && passCount === totalCount;
 
+  useImperativeHandle(ref, () => ({
+    runCode: handleRun,
+    resetCode: handleReset,
+    hasCodeChanged: code !== STARTER_CODE,
+  }));
+
   return (
-    <div className="flex flex-col h-full gap-4">
-      {/* Editor header */}
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-black text-slate-500 uppercase tracking-widest">
-          Seu Código (Python)
-        </h3>
-        <div className="flex gap-2">
-          <button
-            onClick={handleReset}
-            title="Limpar código"
-            className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all"
-          >
-            <RotateCcw className="w-4 h-4" />
-          </button>
-          <button
-            onClick={handleRun}
-            disabled={isRunning || testCases.length === 0}
-            className={`flex items-center gap-2 px-5 py-2 rounded-xl font-black text-sm transition-all shadow-sm ${
-              isRunning || testCases.length === 0
-                ? 'bg-violet-200 text-violet-400 cursor-not-allowed'
-                : 'bg-violet-600 text-white hover:bg-violet-700 shadow-violet-200'
-            }`}
-          >
-            {isRunning ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                {loadingPyodide ? 'Carregando Python…' : 'Executando…'}
-              </>
-            ) : (
-              <>
-                <Play className="w-4 h-4" />
-                Executar
-              </>
-            )}
-          </button>
+    <PanelGroup direction="vertical" className="h-full w-full">
+      {/* Top Panel: Monaco Editor */}
+      <Panel defaultSize={60} minSize={20} className="flex flex-col relative">
+        <div className="bg-slate-800 border-b border-slate-700 px-4 py-2 flex items-center shrink-0">
+          <span className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+            <span className="text-green-400 text-base leading-none">&lt;/&gt;</span> Código (Python)
+          </span>
         </div>
-      </div>
+        <div className="flex-1">
+          <Editor
+            height="100%"
+            defaultLanguage="python"
+            value={code}
+            onChange={(val) => setCode(val ?? '')}
+            theme="vs-dark"
+            options={{
+              fontSize: 14,
+              minimap: { enabled: false },
+              scrollBeyondLastLine: false,
+              lineNumbers: 'on',
+              renderLineHighlight: 'line',
+              padding: { top: 16, bottom: 16 },
+              fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace",
+              fontLigatures: true,
+              tabSize: 4,
+              automaticLayout: true,
+            }}
+          />
+        </div>
+      </Panel>
 
-      {/* Monaco Editor */}
-      <div className="rounded-2xl overflow-hidden border border-slate-700 shadow-lg flex-1 min-h-[400px] mb-4">
-        <Editor
-          height="100%"
-          defaultLanguage="python"
-          value={code}
-          onChange={(val) => setCode(val ?? '')}
-          theme="vs-dark"
-          options={{
-            fontSize: 14,
-            minimap: { enabled: false },
-            scrollBeyondLastLine: false,
-            lineNumbers: 'on',
-            renderLineHighlight: 'line',
-            padding: { top: 16, bottom: 16 },
-            fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace",
-            fontLigatures: true,
-            tabSize: 4,
-            automaticLayout: true,
-          }}
-        />
-      </div>
+      {/* Resize Handle */}
+      <PanelResizeHandle className="h-2 bg-slate-900 hover:bg-violet-600/50 active:bg-violet-600 transition-colors cursor-row-resize flex items-center justify-center border-y border-slate-800">
+        <div className="w-10 h-0.5 bg-slate-600 rounded-full" />
+      </PanelResizeHandle>
 
-      {/* Global error (e.g. Pyodide failed to load) */}
-      {globalError && (
-        <div className="flex items-start gap-3 bg-red-50 border border-red-200 text-red-700 text-sm font-medium p-4 rounded-2xl">
+      {/* Bottom Panel: Test Results / Console */}
+      <Panel defaultSize={40} minSize={20} className="flex flex-col bg-slate-950 overflow-hidden">
+        <div className="bg-slate-800 border-b border-slate-700 px-4 py-2 flex items-center shrink-0">
+          <span className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+            <CheckCircle className="w-3.5 h-3.5 text-emerald-500" /> Testcases &amp; Resultados
+          </span>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {/* Global error (e.g. Pyodide failed to load) */}
+          {globalError && (
+            <div className="flex items-start gap-3 bg-red-950/30 border border-red-900/50 text-red-500 text-sm font-medium p-4 rounded-xl">
           <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
           <span>{globalError}</span>
         </div>
@@ -369,10 +372,20 @@ export default function CodeRunner({ testCases, problemIndex, storageKey, onResu
                   </div>
                 </div>
               )}
-            </div>
-          ))}
+              </div>
+            ))}
+          </div>
+        )}
+        {!results && !globalError && (
+          <div className="flex items-center justify-center h-full text-slate-600 text-sm italic py-10">
+            Execute seu código para ver os resultados aqui
+          </div>
+        )}
         </div>
-      )}
-    </div>
+      </Panel>
+    </PanelGroup>
   );
-}
+});
+
+CodeRunner.displayName = 'CodeRunner';
+export default CodeRunner;
