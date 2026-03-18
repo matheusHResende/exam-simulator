@@ -103,7 +103,7 @@ export default function ProblemViewer({
       </div>
 
       {/* Main Grid Workspace */}
-      <PanelGroup direction="horizontal" className="flex-1 min-h-0 bg-white rounded-l-[2rem] rounded-r-none shadow-sm border border-slate-200 overflow-hidden">
+      <PanelGroup direction="horizontal" className="flex-1 min-h-0 bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
         
         {/* Left Column: Problem description and test cases */}
         <Panel defaultSize={45} minSize={20} className="bg-white overflow-y-auto">
