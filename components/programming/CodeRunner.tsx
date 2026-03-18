@@ -16,7 +16,7 @@ declare global {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type PyodideInstance = any;
 
-interface TestResult {
+export interface TestResult {
   passed: boolean;
   actualOutput: string;
   expectedOutput: string;
@@ -26,15 +26,41 @@ interface TestResult {
 interface CodeRunnerProps {
   testCases: TestCase[];
   problemIndex: number;
+  storageKey: string;
+  onResultsChange?: (results: TestResult[] | null) => void;
 }
 
-const STARTER_CODE = `# Escreva sua solução aqui
-`;
+const STARTER_CODE = `# Escreva sua solução aqui\n`;
+
+function makeCodeKey(storageKey: string, index: number) {
+  return `prog_code_${storageKey}_${index}`;
+}
+
+function makeResultsKey(storageKey: string, index: number) {
+  return `prog_results_${storageKey}_${index}`;
+}
+
+function loadFromStorage<T>(key: string): T | null {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    return JSON.parse(raw) as T;
+  } catch {
+    return null;
+  }
+}
+
+function saveToStorage<T>(key: string, value: T) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // ignore quota errors
+  }
+}
 
 async function getPyodide(): Promise<PyodideInstance> {
   if (window._pyodideInstance) return window._pyodideInstance;
 
-  // Load Pyodide script if not already on the page
   if (!window.loadPyodide) {
     await new Promise<void>((resolve, reject) => {
       const script = document.createElement('script');
@@ -103,28 +129,51 @@ _stdout_buf.getvalue()
   return { stdout: result ?? '', stderr };
 }
 
-export default function CodeRunner({ testCases, problemIndex }: CodeRunnerProps) {
-  const [code, setCode] = useState(STARTER_CODE);
-  const [results, setResults] = useState<TestResult[] | null>(null);
+export default function CodeRunner({ testCases, problemIndex, storageKey, onResultsChange }: CodeRunnerProps) {
+  const codeKey = makeCodeKey(storageKey, problemIndex);
+  const resultsKey = makeResultsKey(storageKey, problemIndex);
+
+  const [code, setCode] = useState<string>(() => {
+    return loadFromStorage<string>(codeKey) ?? STARTER_CODE;
+  });
+  const [results, setResults] = useState<TestResult[] | null>(() => {
+    return loadFromStorage<TestResult[]>(resultsKey);
+  });
   const [isRunning, setIsRunning] = useState(false);
   const [loadingPyodide, setLoadingPyodide] = useState(false);
   const [globalError, setGlobalError] = useState('');
   const prevIndexRef = useRef(problemIndex);
 
-  // Reset editor when navigating to a new problem
+  // Notify parent of restored results on mount
+  useEffect(() => {
+    onResultsChange?.(results);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // When navigating to a new problem, load its saved state
   useEffect(() => {
     if (prevIndexRef.current !== problemIndex) {
-      setCode(STARTER_CODE);
-      setResults(null);
+      const savedCode = loadFromStorage<string>(codeKey) ?? STARTER_CODE;
+      const savedResults = loadFromStorage<TestResult[]>(resultsKey);
+      setCode(savedCode);
+      setResults(savedResults);
       setGlobalError('');
+      onResultsChange?.(savedResults);
       prevIndexRef.current = problemIndex;
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [problemIndex]);
+
+  // Persist code whenever it changes
+  useEffect(() => {
+    saveToStorage(codeKey, code);
+  }, [code, codeKey]);
 
   const handleRun = useCallback(async () => {
     setIsRunning(true);
     setGlobalError('');
     setResults(null);
+    onResultsChange?.(null);
 
     let pyodide: PyodideInstance;
     try {
@@ -162,8 +211,19 @@ export default function CodeRunner({ testCases, problemIndex }: CodeRunnerProps)
     }
 
     setResults(newResults);
+    saveToStorage(resultsKey, newResults);
+    onResultsChange?.(newResults);
     setIsRunning(false);
-  }, [code, testCases]);
+  }, [code, testCases, resultsKey, onResultsChange]);
+
+  const handleReset = useCallback(() => {
+    setCode(STARTER_CODE);
+    setResults(null);
+    setGlobalError('');
+    saveToStorage(codeKey, STARTER_CODE);
+    saveToStorage(resultsKey, null);
+    onResultsChange?.(null);
+  }, [codeKey, resultsKey, onResultsChange]);
 
   const passCount = results?.filter((r) => r.passed).length ?? 0;
   const totalCount = results?.length ?? 0;
@@ -178,11 +238,7 @@ export default function CodeRunner({ testCases, problemIndex }: CodeRunnerProps)
         </h3>
         <div className="flex gap-2">
           <button
-            onClick={() => {
-              setCode(STARTER_CODE);
-              setResults(null);
-              setGlobalError('');
-            }}
+            onClick={handleReset}
             title="Limpar código"
             className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all"
           >

@@ -1,22 +1,31 @@
 import type { Problem } from '@/types/programming';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Flag } from 'lucide-react';
 import CodeRunner from './CodeRunner';
+import type { TestResult } from './CodeRunner';
 
 interface ProblemViewerProps {
   problem: Problem;
   index: number;
   total: number;
+  storageKey: string;
   onPrev: () => void;
   onNext: () => void;
+  onFinish: () => void;
+  onResultsChange: (index: number, results: TestResult[] | null) => void;
 }
 
 export default function ProblemViewer({
   problem,
   index,
   total,
+  storageKey,
   onPrev,
   onNext,
+  onFinish,
+  onResultsChange,
 }: ProblemViewerProps) {
+  const isLast = index === total - 1;
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -36,17 +45,21 @@ export default function ProblemViewer({
           >
             <ChevronLeft className="w-4 h-4 mr-1" /> Anterior
           </button>
-          <button
-            onClick={onNext}
-            disabled={index === total - 1}
-            className={`flex items-center px-4 py-2 rounded-xl font-bold transition-all text-sm ${
-              index === total - 1
-                ? 'text-slate-300 cursor-not-allowed'
-                : 'bg-indigo-600 text-white hover:bg-indigo-700'
-            }`}
-          >
-            Próximo <ChevronRight className="w-4 h-4 ml-1" />
-          </button>
+          {isLast ? (
+            <button
+              onClick={onFinish}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl font-bold transition-all text-sm bg-emerald-600 text-white hover:bg-emerald-700"
+            >
+              <Flag className="w-4 h-4" /> Finalizar Prova
+            </button>
+          ) : (
+            <button
+              onClick={onNext}
+              className="flex items-center px-4 py-2 rounded-xl font-bold transition-all text-sm bg-indigo-600 text-white hover:bg-indigo-700"
+            >
+              Próximo <ChevronRight className="w-4 h-4 ml-1" />
+            </button>
+          )}
         </div>
       </div>
 
@@ -105,7 +118,12 @@ export default function ProblemViewer({
 
       {/* Python IDE */}
       <div className="bg-white rounded-[2rem] shadow-sm border border-slate-200 p-8 md:p-10">
-        <CodeRunner testCases={problem.testCases} problemIndex={index} />
+        <CodeRunner
+          testCases={problem.testCases}
+          problemIndex={index}
+          storageKey={storageKey}
+          onResultsChange={(results) => onResultsChange(index, results)}
+        />
       </div>
     </div>
   );
