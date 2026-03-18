@@ -1,5 +1,6 @@
 import type { Problem } from '@/types/programming';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import CodeRunner from './CodeRunner';
 
 interface ProblemViewerProps {
   problem: Problem;
@@ -100,6 +101,11 @@ export default function ProblemViewer({
             </div>
           )}
         </div>
+      </div>
+
+      {/* Python IDE */}
+      <div className="bg-white rounded-[2rem] shadow-sm border border-slate-200 p-8 md:p-10">
+        <CodeRunner testCases={problem.testCases} problemIndex={index} />
       </div>
     </div>
   );

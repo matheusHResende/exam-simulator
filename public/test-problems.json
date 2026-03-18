@@ -1,0 +1,29 @@
+{
+  "title": "Prova de Programação - Teste",
+  "problems": [
+    {
+      "title": "Olá, Mundo!",
+      "description": "Escreva um programa que imprime exatamente a seguinte mensagem:\nOlá, Mundo!",
+      "testCases": [
+        {
+          "input": "",
+          "expectedOutput": "Olá, Mundo!"
+        }
+      ]
+    },
+    {
+      "title": "Soma de dois números",
+      "description": "Leia dois números inteiros e imprima a sua soma.\n\nEntrada: dois inteiros em linhas separadas.\nSaída: a soma dos dois inteiros.",
+      "testCases": [
+        {
+          "input": "3\n5",
+          "expectedOutput": "8"
+        },
+        {
+          "input": "10\n-3",
+          "expectedOutput": "7"
+        }
+      ]
+    }
+  ]
+}
