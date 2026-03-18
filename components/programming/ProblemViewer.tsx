@@ -188,8 +188,8 @@ export default function ProblemViewer({
       ) : (
         <PanelGroup direction="horizontal" className="flex-1 min-h-0 bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
           {/* Left Column: Problem description and test cases */}
-          <Panel defaultSize={45} minSize={20} className="bg-white overflow-y-auto">
-            <div className="p-8 md:p-10">
+          <Panel defaultSize={45} minSize={20} className="bg-white">
+            <div className="h-full overflow-y-auto p-8 md:p-10">
               <h2 className="text-2xl font-black text-slate-900 mb-6">{problem.title}</h2>
 
               {/* Description */}
