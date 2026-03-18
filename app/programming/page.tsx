@@ -388,15 +388,25 @@ export default function ProgrammingPage() {
               </span>
             </div>
           ) : (
-            <div className="relative">
+            <div className="relative group cursor-pointer flex items-center bg-violet-50 border border-violet-200 rounded-xl px-3 py-1.5 hover:bg-violet-100 transition-colors shadow-sm gap-3">
               <input
                 type="file"
                 accept=".json"
                 onChange={handleFileUpload}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
               />
-              <span className="text-xs font-black text-slate-500 hover:text-violet-600 cursor-pointer transition-colors">
-                Alterar arquivo
+              <div className="flex items-center gap-2">
+                <FileText className="w-4 h-4 text-violet-600" />
+                <div className="text-left flex flex-col justify-center">
+                  <p className="font-bold text-[11px] text-violet-900 leading-none">{fileName}</p>
+                  <p className="text-[10px] text-violet-600 mt-0.5 leading-none">
+                    {problemSet.problems.length} problema{problemSet.problems.length !== 1 ? 's' : ''}
+                  </p>
+                </div>
+              </div>
+              <div className="w-px h-6 bg-violet-200"></div>
+              <span className="text-[10px] font-black text-violet-600 group-hover:text-violet-700 transition-colors uppercase tracking-wider">
+                Alterar
               </span>
             </div>
           )}
@@ -457,20 +467,6 @@ export default function ProgrammingPage() {
           </div>
         ) : (
           <>
-            {/* File badge */}
-            <div className="bg-violet-50 border border-violet-200 p-3 rounded-xl flex items-center mb-0 shrink-0 mx-2 lg:mx-4">
-              <FileText className="w-5 h-5 mr-3 text-violet-600" />
-              <div className="text-left flex-1 flex items-center justify-between">
-                <div>
-                  <p className="font-bold text-sm text-violet-800 leading-none">{fileName}</p>
-                  <p className="text-xs text-violet-500 mt-0.5">
-                    {problemSet.problems.length} problema
-                    {problemSet.problems.length !== 1 ? 's' : ''}
-                  </p>
-                </div>
-              </div>
-            </div>
-
             <div className="flex-1 min-h-0 mt-2">
               <ProblemViewer
                 problem={problemSet.problems[currentIndex]}
