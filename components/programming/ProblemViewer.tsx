@@ -126,15 +126,17 @@ export default function ProblemViewer({
               <h2 className="text-2xl font-black text-slate-900 mb-6">{problem.title}</h2>
 
               {/* Description */}
-              <div className="bg-slate-50 rounded-2xl border border-slate-100 p-6 mb-8 relative overflow-x-auto">
-                <div className="absolute -top-3 left-8 bg-white px-4 border border-slate-100 rounded-full">
+              <div className="bg-slate-50 rounded-2xl border border-slate-100 p-6 mb-8 relative">
+                <div className="absolute -top-3 left-8 bg-white px-4 border border-slate-100 rounded-full z-10">
                   <span className="text-xs font-black text-indigo-600 uppercase tracking-widest">
                     Descrição
                   </span>
                 </div>
-                <p className="text-slate-700 leading-relaxed pt-2 whitespace-pre-wrap">
-                  {problem.description}
-                </p>
+                <div className="overflow-x-auto w-full pt-2">
+                  <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">
+                    {problem.description}
+                  </p>
+                </div>
               </div>
 
               {/* Test cases */}
@@ -193,15 +195,17 @@ export default function ProblemViewer({
               <h2 className="text-2xl font-black text-slate-900 mb-6">{problem.title}</h2>
 
               {/* Description */}
-              <div className="bg-slate-50 rounded-2xl border border-slate-100 p-6 mb-8 relative overflow-x-auto">
-                <div className="absolute -top-3 left-8 bg-white px-4 border border-slate-100 rounded-full">
+              <div className="bg-slate-50 rounded-2xl border border-slate-100 p-6 mb-8 relative">
+                <div className="absolute -top-3 left-8 bg-white px-4 border border-slate-100 rounded-full z-10">
                   <span className="text-xs font-black text-indigo-600 uppercase tracking-widest">
                     Descrição
                   </span>
                 </div>
-                <p className="text-slate-700 leading-relaxed pt-2 whitespace-pre-wrap">
-                  {problem.description}
-                </p>
+                <div className="overflow-x-auto w-full pt-2">
+                  <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">
+                    {problem.description}
+                  </p>
+                </div>
               </div>
 
               {/* Test cases */}
