@@ -103,10 +103,10 @@ export default function ProblemViewer({
       </div>
 
       {/* Main Grid Workspace */}
-      <PanelGroup direction="horizontal" className="flex-1 min-h-0 bg-slate-950 rounded-[2rem] overflow-hidden border border-slate-700 shadow-xl">
+      <PanelGroup direction="horizontal" className="flex-1 min-h-0 bg-transparent gap-2 md:gap-4 flex justify-stretch overflow-visible">
         
         {/* Left Column: Problem description and test cases */}
-        <Panel defaultSize={40} minSize={20} className="bg-white overflow-y-auto">
+        <Panel defaultSize={45} minSize={20} className="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-y-auto">
           <div className="p-8 md:p-10">
             <h2 className="text-2xl font-black text-slate-900 mb-6">{problem.title}</h2>
 
@@ -134,19 +134,19 @@ export default function ProblemViewer({
                       key={i}
                       className="grid grid-cols-1 md:grid-cols-2 gap-4"
                     >
-                      <div className="bg-slate-900 rounded-2xl p-5">
+                      <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5">
                         <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">
                           Entrada #{i + 1}
                         </p>
-                        <pre className="text-green-400 text-sm font-mono whitespace-pre-wrap break-all">
+                        <pre className="text-slate-700 text-sm font-mono whitespace-pre-wrap break-all">
                           {tc.input}
                         </pre>
                       </div>
-                      <div className="bg-indigo-950 rounded-2xl p-5">
-                        <p className="text-xs font-black text-indigo-300 uppercase tracking-widest mb-2">
+                      <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-5">
+                        <p className="text-xs font-black text-indigo-400 uppercase tracking-widest mb-2">
                           Saída Esperada #{i + 1}
                         </p>
-                        <pre className="text-indigo-200 text-sm font-mono whitespace-pre-wrap break-all">
+                        <pre className="text-indigo-900 text-sm font-mono whitespace-pre-wrap break-all">
                           {tc.expectedOutput}
                         </pre>
                       </div>
@@ -159,12 +159,12 @@ export default function ProblemViewer({
         </Panel>
 
         {/* Resize Handle */}
-        <PanelResizeHandle className="w-2 bg-slate-900 hover:bg-violet-600/50 active:bg-violet-600 transition-colors cursor-col-resize flex items-center justify-center border-x border-slate-800">
-          <div className="h-10 w-0.5 bg-slate-600 rounded-full" />
+        <PanelResizeHandle className="w-4 bg-transparent hover:bg-violet-100/50 active:bg-violet-100 transition-colors cursor-col-resize flex items-center justify-center rounded-full group shrink-0">
+          <div className="h-10 w-1 bg-slate-200 group-hover:bg-violet-400 rounded-full transition-colors" />
         </PanelResizeHandle>
 
         {/* Right Column: Python IDE */}
-        <Panel defaultSize={60} minSize={30} className="flex flex-col min-h-0 bg-[#1e1e1e]">
+        <Panel defaultSize={55} minSize={30} className="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden flex flex-col min-h-0 relative">
           <CodeRunner
             ref={codeRunnerRef}
             testCases={problem.testCases}

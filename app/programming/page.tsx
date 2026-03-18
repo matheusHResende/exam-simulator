@@ -213,11 +213,11 @@ export default function ProgrammingPage() {
               <ChevronLeft className="w-4 h-4 mr-1" /> Sair
             </Link>
             <div className="flex items-center gap-3">
-              <div className="bg-violet-600 w-8 h-8 rounded-lg flex items-center justify-center shadow-lg shadow-violet-900/50">
-                <Code2 className="w-4 h-4 text-white" />
+              <div className="bg-violet-600 w-10 h-10 rounded-xl flex items-center justify-center shadow-lg shadow-violet-200">
+                <Code2 className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-sm font-black text-white leading-none">
+                <h1 className="text-xl font-black text-slate-900 leading-none">
                   {problemSet.title}
                 </h1>
               </div>
@@ -351,7 +351,7 @@ export default function ProgrammingPage() {
 
   // ─── Main exam screen ─────────────────────────────────────────────────────
   return (
-    <div className="h-screen w-full bg-slate-900 flex flex-col text-slate-200">
+    <div className="h-screen w-full bg-slate-50 flex flex-col text-slate-900">
       <div className="flex-1 flex flex-col min-h-0 w-full p-2 md:p-4 pb-0">
         {/* Top bar */}
         <div className="flex items-center justify-between mb-2 shrink-0 px-2">
@@ -458,12 +458,12 @@ export default function ProgrammingPage() {
         ) : (
           <>
             {/* File badge */}
-            <div className="bg-slate-800 border border-slate-700 p-3 rounded-xl flex items-center mb-0 shrink-0">
-              <FileText className="w-5 h-5 mr-3 text-slate-400" />
+            <div className="bg-violet-50 border border-violet-200 p-3 rounded-xl flex items-center mb-0 shrink-0 mx-2 lg:mx-4">
+              <FileText className="w-5 h-5 mr-3 text-violet-600" />
               <div className="text-left flex-1 flex items-center justify-between">
                 <div>
-                  <p className="font-bold text-sm text-slate-200 leading-none">{fileName}</p>
-                  <p className="text-xs text-slate-400 mt-0.5">
+                  <p className="font-bold text-sm text-violet-800 leading-none">{fileName}</p>
+                  <p className="text-xs text-violet-500 mt-0.5">
                     {problemSet.problems.length} problema
                     {problemSet.problems.length !== 1 ? 's' : ''}
                   </p>

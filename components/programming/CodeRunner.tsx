@@ -249,15 +249,15 @@ const CodeRunner = forwardRef<CodeRunnerRef, CodeRunnerProps>(({ testCases, prob
   }));
 
   return (
-    <PanelGroup direction="vertical" className="h-full w-full">
+    <PanelGroup direction="vertical" className="h-full w-full p-4 md:p-6 pb-2 bg-transparent">
       {/* Top Panel: Monaco Editor */}
-      <Panel defaultSize={60} minSize={20} className="flex flex-col relative">
-        <div className="bg-slate-800 border-b border-slate-700 px-4 py-2 flex items-center shrink-0">
-          <span className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-            <span className="text-green-400 text-base leading-none">&lt;/&gt;</span> Código (Python)
-          </span>
+      <Panel defaultSize={60} minSize={20} className="flex flex-col relative bg-transparent">
+        <div className="flex items-center justify-between mb-4 shrink-0">
+          <h3 className="text-sm font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+            Seu Código (Python)
+          </h3>
         </div>
-        <div className="flex-1">
+        <div className="flex-1 rounded-2xl overflow-hidden border border-slate-300 shadow-sm min-h-[150px]">
           <Editor
             height="100%"
             defaultLanguage="python"
@@ -281,19 +281,19 @@ const CodeRunner = forwardRef<CodeRunnerRef, CodeRunnerProps>(({ testCases, prob
       </Panel>
 
       {/* Resize Handle */}
-      <PanelResizeHandle className="h-2 bg-slate-900 hover:bg-violet-600/50 active:bg-violet-600 transition-colors cursor-row-resize flex items-center justify-center border-y border-slate-800">
-        <div className="w-10 h-0.5 bg-slate-600 rounded-full" />
+      <PanelResizeHandle className="h-6 bg-transparent hover:bg-violet-50/50 active:bg-violet-50 transition-colors cursor-row-resize flex items-center justify-center group my-1">
+        <div className="w-10 h-1 bg-slate-200 group-hover:bg-violet-400 rounded-full transition-colors" />
       </PanelResizeHandle>
 
       {/* Bottom Panel: Test Results / Console */}
-      <Panel defaultSize={40} minSize={20} className="flex flex-col bg-slate-950 overflow-hidden">
-        <div className="bg-slate-800 border-b border-slate-700 px-4 py-2 flex items-center shrink-0">
-          <span className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-            <CheckCircle className="w-3.5 h-3.5 text-emerald-500" /> Testcases &amp; Resultados
-          </span>
+      <Panel defaultSize={40} minSize={20} className="flex flex-col bg-transparent overflow-hidden">
+        <div className="flex items-center justify-between mb-2 shrink-0">
+          <h3 className="text-sm font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+            <CheckCircle className="w-4 h-4 text-emerald-500" /> Resultados / Casos de Teste
+          </h3>
         </div>
         
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto pb-4 space-y-4 pr-1">
           {/* Global error (e.g. Pyodide failed to load) */}
           {globalError && (
             <div className="flex items-start gap-3 bg-red-950/30 border border-red-900/50 text-red-500 text-sm font-medium p-4 rounded-xl">
@@ -349,22 +349,22 @@ const CodeRunner = forwardRef<CodeRunnerRef, CodeRunnerProps>(({ testCases, prob
               {!r.passed && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-red-200/50 border-t border-red-200">
                   {/* Expected */}
-                  <div className="bg-slate-900 p-4">
-                    <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">
+                  <div className="bg-indigo-50 p-4">
+                    <p className="text-xs font-black text-indigo-400 uppercase tracking-widest mb-2">
                       Saída Esperada
                     </p>
-                    <pre className="text-indigo-300 text-sm font-mono whitespace-pre-wrap break-all">
+                    <pre className="text-indigo-900 text-sm font-mono whitespace-pre-wrap break-all">
                       {r.expectedOutput || '(vazio)'}
                     </pre>
                   </div>
                   {/* Actual */}
-                  <div className="bg-slate-800 p-4">
-                    <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">
+                  <div className="bg-red-50 p-4">
+                    <p className="text-xs font-black text-red-400 uppercase tracking-widest mb-2">
                       {r.error ? 'Erro' : 'Sua Saída'}
                     </p>
                     <pre
                       className={`text-sm font-mono whitespace-pre-wrap break-all ${
-                        r.error ? 'text-red-400' : 'text-green-400'
+                        r.error ? 'text-red-600' : 'text-slate-700'
                       }`}
                     >
                       {r.error || r.actualOutput || '(vazio)'}
