@@ -126,7 +126,7 @@ export default function ProblemViewer({
               <h2 className="text-2xl font-black text-slate-900 mb-6">{problem.title}</h2>
 
               {/* Description */}
-              <div className="bg-slate-50 rounded-2xl border border-slate-100 p-6 mb-8 relative">
+              <div className="bg-slate-50 rounded-2xl border border-slate-100 p-6 mb-8 relative overflow-x-auto">
                 <div className="absolute -top-3 left-8 bg-white px-4 border border-slate-100 rounded-full">
                   <span className="text-xs font-black text-indigo-600 uppercase tracking-widest">
                     Descrição
@@ -193,7 +193,7 @@ export default function ProblemViewer({
               <h2 className="text-2xl font-black text-slate-900 mb-6">{problem.title}</h2>
 
               {/* Description */}
-              <div className="bg-slate-50 rounded-2xl border border-slate-100 p-6 mb-8 relative">
+              <div className="bg-slate-50 rounded-2xl border border-slate-100 p-6 mb-8 relative overflow-x-auto">
                 <div className="absolute -top-3 left-8 bg-white px-4 border border-slate-100 rounded-full">
                   <span className="text-xs font-black text-indigo-600 uppercase tracking-widest">
                     Descrição

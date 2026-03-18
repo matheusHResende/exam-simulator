@@ -30,9 +30,11 @@ export default function GabaritoList({ questions, answers }: GabaritoListProps) 
                 </span>
               </div>
 
-              <p className="text-xl font-bold text-slate-800 mb-8 leading-relaxed">
-                {q.question}
-              </p>
+              <div className="mb-8 w-full overflow-x-auto">
+                <p className="text-xl font-bold text-slate-800 leading-relaxed whitespace-pre-wrap">
+                  {q.question}
+                </p>
+              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                 <div

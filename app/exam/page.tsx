@@ -525,9 +525,11 @@ export default function ExamPage() {
           </div>
 
           <div className="bg-white p-6 md:p-12 rounded-[2rem] shadow-sm border border-slate-200 mb-8">
-            <h3 className="text-xl md:text-2xl font-bold text-slate-800 mb-10 leading-snug">
-              {question.question}
-            </h3>
+            <div className="mb-10 w-full overflow-x-auto">
+              <h3 className="text-xl md:text-2xl font-bold text-slate-800 leading-snug whitespace-pre-wrap">
+                {question.question}
+              </h3>
+            </div>
             <div className="space-y-4">
               {question.options.map((opt, idx) => {
                 const letter = String.fromCharCode(65 + idx);
