@@ -197,17 +197,17 @@ export default function ExamPage() {
     return (
       <div className="min-h-screen bg-slate-50 p-4 md:p-8">
         <div className="max-w-4xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
+          <div className="flex flex-wrap justify-between items-center gap-2 mb-8">
             <button
               onClick={() => setStatus('idle')}
-              className="text-slate-500 hover:text-slate-800 font-bold flex items-center transition-colors"
+              className="text-slate-500 hover:text-slate-800 font-bold flex items-center transition-colors shrink-0"
             >
               <ChevronLeft className="w-5 h-5 mr-1" /> Voltar
             </button>
-            <h2 className="text-2xl font-black text-slate-800">Sua Evolução</h2>
+            <h2 className="text-2xl font-black text-slate-800 truncate min-w-0">Sua Evolução</h2>
             <button
               onClick={clearHistory}
-              className="text-red-400 hover:text-red-600 p-2 transition-colors"
+              className="text-red-400 hover:text-red-600 p-2 transition-colors shrink-0"
             >
               <Trash2 className="w-5 h-5" />
             </button>
@@ -285,9 +285,11 @@ export default function ExamPage() {
                 </p>
               </div>
             )}
-            <div className="flex justify-between mt-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest px-10">
-              <span>Provas Antigas</span>
-              <span>Mais Recente</span>
+            <div className="overflow-x-auto">
+              <div className="flex justify-between mt-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest min-w-[600px] px-10">
+                <span>Provas Antigas</span>
+                <span>Mais Recente</span>
+              </div>
             </div>
           </div>
 
@@ -345,10 +347,10 @@ export default function ExamPage() {
     return (
       <div className="min-h-screen bg-slate-50 p-4 md:p-8">
         <div className="max-w-4xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
+          <div className="flex flex-wrap justify-between items-center gap-y-2 mb-8">
             <button
               onClick={() => setStatus('history')}
-              className="text-slate-500 hover:text-slate-800 font-bold flex items-center transition-colors"
+              className="text-slate-500 hover:text-slate-800 font-bold flex items-center transition-colors shrink-0"
             >
               <ChevronLeft className="w-5 h-5 mr-1" /> Voltar ao Histórico
             </button>
@@ -556,17 +558,17 @@ export default function ExamPage() {
             </div>
           </div>
 
-          <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+          <div className="flex justify-between items-center gap-2 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
             <button
               onClick={() => currentIndex > 0 && setCurrentIndex(currentIndex - 1)}
               disabled={currentIndex === 0}
-              className={`flex items-center px-6 py-3 rounded-xl font-bold transition-all ${
+              className={`flex items-center shrink-0 px-4 sm:px-6 py-3 rounded-xl font-bold transition-all ${
                 currentIndex === 0
                   ? 'text-slate-300 cursor-not-allowed'
                   : 'text-slate-600 hover:bg-slate-100'
               }`}
             >
-              <ChevronLeft className="w-5 h-5 mr-2" /> Anterior
+              <ChevronLeft className="w-5 h-5 mr-1 sm:mr-2" /> <span className="hidden xs:inline">Anterior</span>
             </button>
             <button
               onClick={() =>
@@ -575,7 +577,7 @@ export default function ExamPage() {
                   : setCurrentIndex(currentIndex + 1)
               }
               disabled={!userAnswers[currentIndex]}
-              className={`flex items-center px-8 py-4 rounded-xl font-black transition-all shadow-lg ${
+              className={`flex items-center shrink-0 px-5 sm:px-8 py-3 sm:py-4 rounded-xl font-black text-sm sm:text-base transition-all shadow-lg ${
                 !userAnswers[currentIndex]
                   ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
                   : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-200 transform hover:-translate-y-0.5'
@@ -599,7 +601,7 @@ export default function ExamPage() {
     return (
       <div className="min-h-screen bg-slate-50 p-4 md:p-8">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-white p-10 md:p-16 rounded-[3rem] shadow-xl border border-slate-200 text-center mb-12 relative overflow-hidden">
+          <div className="bg-white p-6 sm:p-10 md:p-16 rounded-[2rem] sm:rounded-[3rem] shadow-xl border border-slate-200 text-center mb-12 relative overflow-hidden">
             <div className={`absolute top-0 left-0 w-full h-3 ${passed ? 'bg-green-500' : 'bg-amber-500'}`} />
             <div
               className={`w-28 h-28 rounded-3xl flex items-center justify-center mx-auto mb-8 transform rotate-3 ${

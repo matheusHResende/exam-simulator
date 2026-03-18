@@ -208,7 +208,7 @@ export default function ProgrammingPage() {
           <div className="flex items-center justify-between mb-8">
             <Link
               href="/"
-              className="text-slate-400 hover:text-white font-bold flex items-center transition-colors text-sm"
+              className="text-slate-400 hover:text-slate-700 font-bold flex items-center transition-colors text-sm"
             >
               <ChevronLeft className="w-4 h-4 mr-1" /> Sair
             </Link>
@@ -351,10 +351,10 @@ export default function ProgrammingPage() {
 
   // ─── Main exam screen ─────────────────────────────────────────────────────
   return (
-    <div className="h-screen w-full bg-slate-50 flex flex-col text-slate-900">
+    <div className="min-h-screen lg:h-screen w-full bg-slate-50 flex flex-col text-slate-900 overflow-auto lg:overflow-hidden">
       <div className="flex-1 flex flex-col min-h-0 w-full p-2 md:p-4 pb-0">
         {/* Top bar */}
-        <div className="flex items-center justify-between mb-2 shrink-0 px-2">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-2 shrink-0 px-2">
           <Link
             href="/"
             className="text-slate-500 hover:text-slate-800 font-bold flex items-center transition-colors"

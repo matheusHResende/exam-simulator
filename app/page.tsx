@@ -8,7 +8,7 @@ export default function Home() {
         <div className="bg-indigo-600 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-lg shadow-indigo-200">
           <BookOpen className="w-10 h-10 text-white" />
         </div>
-        <h1 className="text-5xl font-extrabold text-slate-900 mb-4">
+        <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 mb-4">
           Simulador de Provas
         </h1>
         <p className="text-slate-500 text-lg leading-relaxed">
