@@ -230,7 +230,7 @@ export default function CodeRunner({ testCases, problemIndex, storageKey, onResu
   const allPassed = results !== null && passCount === totalCount;
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col h-full gap-4">
       {/* Editor header */}
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-black text-slate-500 uppercase tracking-widest">
@@ -269,9 +269,9 @@ export default function CodeRunner({ testCases, problemIndex, storageKey, onResu
       </div>
 
       {/* Monaco Editor */}
-      <div className="rounded-2xl overflow-hidden border border-slate-700 shadow-lg">
+      <div className="rounded-2xl overflow-hidden border border-slate-700 shadow-lg flex-1 min-h-[400px] mb-4">
         <Editor
-          height="320px"
+          height="100%"
           defaultLanguage="python"
           value={code}
           onChange={(val) => setCode(val ?? '')}

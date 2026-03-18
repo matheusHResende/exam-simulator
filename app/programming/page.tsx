@@ -353,7 +353,7 @@ export default function ProgrammingPage() {
   // ─── Main exam screen ─────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-8">
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-[1400px] mx-auto">
         {/* Top bar */}
         <div className="flex items-center justify-between mb-8">
           <Link
