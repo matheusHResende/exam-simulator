@@ -16,7 +16,7 @@ export default function Home() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl w-full">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl w-full">
         {/* Exam card */}
         <Link
           href="/exam"
@@ -52,6 +52,25 @@ export default function Home() {
           </p>
           <span className="mt-6 inline-block bg-violet-600 group-hover:bg-violet-700 text-white text-xs font-black px-5 py-2 rounded-full transition-colors">
             Iniciar →
+          </span>
+        </Link>
+
+        {/* Practice card */}
+        <Link
+          href="/programming/create"
+          className="group bg-white p-8 rounded-3xl shadow-sm border border-slate-200 hover:border-emerald-400 hover:shadow-xl hover:shadow-emerald-100 transition-all duration-300 flex flex-col items-center text-center"
+        >
+          <div className="w-16 h-16 bg-emerald-50 group-hover:bg-emerald-600 rounded-2xl flex items-center justify-center mb-6 transition-colors duration-300">
+            <Code2 className="w-8 h-8 text-emerald-600 group-hover:text-white transition-colors duration-300" />
+          </div>
+          <h2 className="text-xl font-black text-slate-900 mb-2 group-hover:text-emerald-700 transition-colors">
+            Prática Livre
+          </h2>
+          <p className="text-slate-500 text-sm leading-relaxed">
+            Crie seus próprios problemas de programação e casos de teste, e escreva o código para resolvê-los.
+          </p>
+          <span className="mt-6 inline-block bg-emerald-600 group-hover:bg-emerald-700 text-white text-xs font-black px-5 py-2 rounded-full transition-colors">
+            Praticar →
           </span>
         </Link>
       </div>
