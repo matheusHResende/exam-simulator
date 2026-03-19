@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback, forwardRef, useImperativeHandle } from 'react';
 import Editor from '@monaco-editor/react';
-import { CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { CheckCircle, XCircle, AlertTriangle, Play, Loader2 } from 'lucide-react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import type { TestCase } from '@/types/programming';
 
@@ -229,6 +229,15 @@ const CodeRunner = forwardRef<CodeRunnerRef, CodeRunnerProps>(({ testCases, prob
     setIsRunning(false);
   }, [code, testCases, resultsKey, onResultsChange]);
 
+  const runActionRef = useRef<() => void>(() => {});
+  useEffect(() => {
+    runActionRef.current = () => {
+      if (!isRunning && testCases.length > 0) {
+        handleRun();
+      }
+    };
+  }, [isRunning, testCases.length, handleRun]);
+
   const handleReset = useCallback(() => {
     setCode(STARTER_CODE);
     setResults(null);
@@ -252,10 +261,32 @@ const CodeRunner = forwardRef<CodeRunnerRef, CodeRunnerProps>(({ testCases, prob
     <PanelGroup direction="vertical" className="h-full w-full bg-white">
       {/* Top Panel: Monaco Editor */}
       <Panel defaultSize={60} minSize={20} className="flex flex-col relative">
-        <div className="bg-slate-50 border-b border-slate-200 px-4 py-3 flex items-center shrink-0">
+        <div className="bg-slate-50 border-b border-slate-200 px-4 py-2 flex items-center justify-between shrink-0">
           <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
             <span className="text-emerald-500 text-sm leading-none font-mono font-bold">&lt;/&gt;</span> Código (Python)
           </span>
+          <button
+            title="Atalho: Ctrl + Enter"
+            onClick={handleRun}
+            disabled={isRunning || testCases.length === 0}
+            className={`flex items-center gap-2 px-4 py-1.5 rounded-lg font-black text-xs transition-all shadow-sm ${
+              isRunning || testCases.length === 0
+                ? 'bg-violet-200 text-violet-400 cursor-not-allowed'
+                : 'bg-violet-600 text-white hover:bg-violet-700 shadow-violet-200'
+            }`}
+          >
+            {isRunning ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                {loadingPyodide ? 'Carregando…' : 'Executando…'}
+              </>
+            ) : (
+              <>
+                <Play className="w-3.5 h-3.5" />
+                Executar
+              </>
+            )}
+          </button>
         </div>
         <div className="flex-1">
           <Editor
@@ -264,6 +295,11 @@ const CodeRunner = forwardRef<CodeRunnerRef, CodeRunnerProps>(({ testCases, prob
             value={code}
             onChange={(val) => setCode(val ?? '')}
             theme="vs-dark"
+            onMount={(editor, monaco) => {
+              editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+                runActionRef.current?.();
+              });
+            }}
             options={{
               fontSize: 14,
               minimap: { enabled: false },

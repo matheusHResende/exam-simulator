@@ -1,9 +1,9 @@
-import { useRef, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import type { Problem } from '@/types/programming';
-import { ChevronLeft, ChevronRight, Flag, Play, Loader2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Flag } from 'lucide-react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import CodeRunner from './CodeRunner';
-import type { TestResult, CodeRunnerRef } from './CodeRunner';
+import type { TestResult } from './CodeRunner';
 
 interface ProblemViewerProps {
   problem: Problem;
@@ -29,9 +29,6 @@ export default function ProblemViewer({
   onResultsChange,
 }: ProblemViewerProps) {
   const isLast = index === total - 1;
-  const codeRunnerRef = useRef<CodeRunnerRef>(null);
-  const [isRunning, setIsRunning] = useState(false);
-  const [loadingPyodide, setLoadingPyodide] = useState(false);
 
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -64,30 +61,6 @@ export default function ProblemViewer({
           </button>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => codeRunnerRef.current?.runCode()}
-            disabled={isRunning || problem.testCases.length === 0}
-            className={`flex items-center gap-2 px-5 py-2 rounded-xl font-black text-sm transition-all shadow-sm ${
-              isRunning || problem.testCases.length === 0
-                ? 'bg-violet-200 text-violet-400 cursor-not-allowed'
-                : 'bg-violet-600 text-white hover:bg-violet-700 shadow-violet-200'
-            }`}
-          >
-            {isRunning ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                {loadingPyodide ? 'Carregando Python…' : 'Executando…'}
-              </>
-            ) : (
-              <>
-                <Play className="w-4 h-4" />
-                Executar
-              </>
-            )}
-          </button>
-
-          <div className="w-px bg-slate-200 mx-1 self-stretch" />
-
           <button
             onClick={onPrev}
             disabled={index === 0}
@@ -175,15 +148,10 @@ export default function ProblemViewer({
           {/* Code editor panel — fixed height on mobile */}
           <div className="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden shrink-0 h-[500px]">
             <CodeRunner
-              ref={codeRunnerRef}
               testCases={problem.testCases}
               problemIndex={index}
               storageKey={storageKey}
               onResultsChange={(results) => onResultsChange(index, results)}
-              onRunningStateChange={(running, pyloading) => {
-                setIsRunning(running);
-                setLoadingPyodide(pyloading);
-              }}
             />
           </div>
         </div>
@@ -252,15 +220,10 @@ export default function ProblemViewer({
           {/* Right Column: Python IDE */}
           <Panel defaultSize={55} minSize={30} className="bg-white flex flex-col min-h-0 relative">
             <CodeRunner
-              ref={codeRunnerRef}
               testCases={problem.testCases}
               problemIndex={index}
               storageKey={storageKey}
               onResultsChange={(results) => onResultsChange(index, results)}
-              onRunningStateChange={(running, pyloading) => {
-                setIsRunning(running);
-                setLoadingPyodide(pyloading);
-              }}
             />
           </Panel>
         </PanelGroup>

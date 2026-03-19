@@ -16,6 +16,50 @@ function makeStorageKey(title: string): string {
     .slice(0, 40);
 }
 
+// ─── Formatting helper ────────────────────────────────────────────────────
+function formatPythonComment(title: string, description: string): string {
+  const MAX_LEN = 120;
+  const prefix = '# ';
+  
+  const breakText = (text: string) => {
+    if (!text) return '#';
+    const lines = text.replace(/\r\n/g, '\n').split('\n');
+    const result: string[] = [];
+    
+    for (const line of lines) {
+      if (line.trim().length === 0) {
+        result.push('#');
+        continue;
+      }
+      if (prefix.length + line.length <= MAX_LEN) {
+        result.push(prefix + line);
+        continue;
+      }
+      
+      let currentLine = prefix;
+      const words = line.split(' ');
+      
+      for (const word of words) {
+        if (!word) continue;
+        if (currentLine === prefix) {
+          currentLine += word;
+        } else if (currentLine.length + 1 + word.length <= MAX_LEN) {
+          currentLine += ' ' + word;
+        } else {
+          result.push(currentLine);
+          currentLine = prefix + word;
+        }
+      }
+      if (currentLine !== prefix) {
+        result.push(currentLine);
+      }
+    }
+    return result.join('\n');
+  };
+
+  return `${breakText(title)}\n#\n${breakText(description)}\n\n`;
+}
+
 // ─── Tar creation helper ──────────────────────────────────────────────────
 function createTarArchive(files: { name: string; content: string }[]): Uint8Array {
   // A standard tar block is 512 bytes.
@@ -159,7 +203,7 @@ export default function ProgrammingPage() {
       }
       return {
         name: `${p.title}.py`,
-        content: code
+        content: formatPythonComment(p.title, p.description) + code
       };
     });
 
