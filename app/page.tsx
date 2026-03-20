@@ -1,5 +1,11 @@
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { BookOpen, Code2 } from 'lucide-react';
+
+export const metadata: Metadata = {
+  title: 'Início | Simulador de Provas e Programação',
+  description: 'Bem-vindo ao simulador de provas. Escolha entre simulador de questões e provas de programação.',
+};
 
 export default function Home() {
   return (
