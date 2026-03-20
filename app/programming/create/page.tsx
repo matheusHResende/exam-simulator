@@ -5,9 +5,9 @@ import Link from 'next/link';
 import { ChevronLeft, ChevronRight, Plus, Trash2, Code2, Download, Trophy, CheckCircle, XCircle, RotateCcw, FileText } from 'lucide-react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import CodeRunner from '@/components/programming/CodeRunner';
-import type { TestResult } from '@/components/programming/CodeRunner';
-import type { TestCase, Problem, ProblemSet } from '@/types/programming';
+import type { TestCase, Problem, ProblemSet, TestResult } from '@/types/programming';
 import { downloadCodeArchive } from '@/lib/programming';
+import { makeCodeKey, loadFromStorage } from '@/lib/storage';
 
 export default function CreatePage() {
   const [examTitle, setExamTitle] = useState('Meu Simulado');
@@ -114,7 +114,12 @@ export default function CreatePage() {
   };
 
   const handleDownloadCode = () => {
-    downloadCodeArchive(examTitle, 'practice_mode', problems);
+    const problemsWithCode = problems.map((p, i) => {
+      const codeKey = makeCodeKey('practice_mode', i);
+      const code = loadFromStorage<string>(codeKey) || '';
+      return { ...p, code };
+    });
+    downloadCodeArchive(examTitle, problemsWithCode);
   };
 
   // ─── Summary screen ───────────────────────────────────────────────────────
@@ -490,7 +495,7 @@ export default function CreatePage() {
                 key={`runner_mobile_${currentIndex}`}
                 testCases={currentProblem.testCases}
                 problemIndex={currentIndex}
-                storageKey={`practice_mode_${currentIndex}`}
+                storageKey="practice_mode"
                 onResultsChange={handleResultsChange}
               />
             </div>
@@ -510,7 +515,7 @@ export default function CreatePage() {
                 key={`runner_${currentIndex}`}
                 testCases={currentProblem.testCases}
                 problemIndex={currentIndex}
-                storageKey={`practice_mode_${currentIndex}`}
+                storageKey="practice_mode"
                 onResultsChange={handleResultsChange}
               />
             </Panel>

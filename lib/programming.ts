@@ -106,31 +106,12 @@ export function createTarArchive(files: { name: string; content: string }[]): Ui
 
 export function downloadCodeArchive(
   examTitle: string, 
-  storageKeyPrefix: string, 
-  problems: { title: string, description: string }[]
+  problems: { title: string; description: string; code: string }[]
 ) {
-  const files = problems.map((p, i) => {
-    // Note: in practice page it uses `practice_mode_i`, in normal exam mode it uses `prog_code_XYZ_i`
-    // We pass the exact prefix. If prefix is "practice_mode", key is `practice_mode_0`
-    const storageKeyForCode = storageKeyPrefix.includes('prog_code') 
-      ? `${storageKeyPrefix}_${i}` // app/programming uses this format
-      : `${storageKeyPrefix}_${i}`; // app/programming/create uses this format too.
-      
-    let code = '';
-    try {
-      const raw = localStorage.getItem(storageKeyForCode);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (typeof parsed === 'string') {
-          code = parsed;
-        }
-      }
-    } catch {
-      // ignore
-    }
+  const files = problems.map((p) => {
     return {
       name: `${p.title}.py`,
-      content: formatPythonComment(p.title, p.description) + code
+      content: formatPythonComment(p.title, p.description) + p.code
     };
   });
 

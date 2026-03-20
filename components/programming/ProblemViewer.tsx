@@ -3,7 +3,7 @@ import type { Problem } from '@/types/programming';
 import { ChevronLeft, ChevronRight, Flag } from 'lucide-react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import CodeRunner from './CodeRunner';
-import type { TestResult } from './CodeRunner';
+import type { TestResult } from '@/types/programming';
 
 interface ProblemViewerProps {
   problem: Problem;

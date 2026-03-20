@@ -13,3 +13,10 @@ export interface ProblemSet {
   title: string;
   problems: Problem[];
 }
+
+export interface TestResult {
+  passed: boolean;
+  actualOutput: string;
+  expectedOutput: string;
+  error?: string;
+}
