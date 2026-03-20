@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight, Plus, Trash2, Code2, Download } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Trash2, Code2, Download, Trophy, CheckCircle, XCircle, RotateCcw, FileText } from 'lucide-react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import CodeRunner from '@/components/programming/CodeRunner';
 import type { TestResult } from '@/components/programming/CodeRunner';
 import type { TestCase, Problem, ProblemSet } from '@/types/programming';
+import { downloadCodeArchive } from '@/lib/programming';
 
 export default function CreatePage() {
   const [examTitle, setExamTitle] = useState('Meu Simulado');
@@ -15,6 +16,7 @@ export default function CreatePage() {
   ]);
   const [allResults, setAllResults] = useState<(TestResult[] | null)[]>([null]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [showSummary, setShowSummary] = useState(false);
 
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -55,7 +57,6 @@ export default function CreatePage() {
     const nextResults = allResults.filter((_, i) => i !== currentIndex);
     setProblems(nextProblems);
     setAllResults(nextResults);
-    // Adjust index if we removed the last item
     if (currentIndex >= nextProblems.length) {
       setCurrentIndex(nextProblems.length - 1);
     }
@@ -111,6 +112,173 @@ export default function CreatePage() {
       URL.revokeObjectURL(url);
     }, 100);
   };
+
+  const handleDownloadCode = () => {
+    downloadCodeArchive(examTitle, 'practice_mode', problems);
+  };
+
+  // ─── Summary screen ───────────────────────────────────────────────────────
+  if (showSummary) {
+    const totalProblems = problems.length;
+    let totalPassed = 0;
+    let totalCases = 0;
+
+    const problemSummaries = problems.map((p, i) => {
+      const res = allResults[i];
+      const passed = res ? res.filter((r) => r.passed).length : 0;
+      const total = res ? res.length : p.testCases.length;
+      totalPassed += passed;
+      totalCases += total;
+      const allPassed = res !== null && passed === total && total > 0;
+      const notRun = res === null;
+      return { title: p.title, passed, total, allPassed, notRun };
+    });
+
+    const fullySolvedCount = problemSummaries.filter((s) => s.allPassed).length;
+    const overallPct = totalCases > 0 ? Math.round((totalPassed / totalCases) * 100) : 0;
+
+    return (
+      <div className="min-h-screen bg-slate-50 p-4 md:p-8 flex flex-col items-center justify-center">
+        <div className="max-w-2xl w-full">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-8">
+            <Link
+              href="/"
+              className="text-slate-400 hover:text-slate-700 font-bold flex items-center transition-colors text-sm"
+            >
+              <ChevronLeft className="w-4 h-4 mr-1" /> Sair
+            </Link>
+            <div className="flex items-center gap-3">
+              <div className="bg-emerald-600 w-10 h-10 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-200">
+                <Code2 className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-black text-slate-900 leading-none">
+                  {examTitle}
+                </h1>
+              </div>
+            </div>
+            <div className="w-24" />
+          </div>
+
+          {/* Trophy card */}
+          <div className="bg-white rounded-[2rem] shadow-sm border border-slate-200 p-10 text-center mb-6">
+            <div
+              className={`w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg ${
+                fullySolvedCount === totalProblems
+                  ? 'bg-emerald-500 shadow-emerald-200'
+                  : 'bg-indigo-600 shadow-indigo-200'
+              }`}
+            >
+              <Trophy className="w-10 h-10 text-white" />
+            </div>
+            <h2 className="text-3xl font-black text-slate-900 mb-2">Prova Pronta!</h2>
+            <p className="text-slate-500 mb-6 font-medium">
+              Todos os problemas foram implementados com sucesso.
+            </p>
+
+            {/* Big score */}
+            <div className="inline-flex items-end gap-1 mb-6">
+              <span className="text-6xl font-black text-slate-900">{overallPct}%</span>
+              <span className="text-lg text-slate-400 font-bold mb-2">de acerto</span>
+            </div>
+
+            <div className="flex justify-center gap-6 text-sm font-bold">
+              <div className="text-center">
+                <p className="text-2xl font-black text-emerald-600">{fullySolvedCount}</p>
+                <p className="text-slate-500">problema{fullySolvedCount !== 1 ? 's' : ''} resolvido{fullySolvedCount !== 1 ? 's' : ''}</p>
+              </div>
+              <div className="w-px bg-slate-200" />
+              <div className="text-center">
+                <p className="text-2xl font-black text-slate-700">{totalProblems}</p>
+                <p className="text-slate-500">total de problemas</p>
+              </div>
+              <div className="w-px bg-slate-200" />
+              <div className="text-center">
+                <p className="text-2xl font-black text-indigo-600">
+                  {totalPassed}/{totalCases}
+                </p>
+                <p className="text-slate-500">casos de teste</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Per-problem breakdown */}
+          <div className="space-y-3">
+            <p className="text-xs font-black text-slate-400 uppercase tracking-widest px-1">
+              Detalhamento por problema
+            </p>
+            {problemSummaries.map((s, i) => (
+              <button
+                key={i}
+                onClick={() => {
+                  setCurrentIndex(i);
+                  setShowSummary(false);
+                }}
+                className={`w-full flex items-center justify-between p-5 rounded-2xl border text-left transition-colors cursor-pointer hover:shadow-sm ${
+                  s.allPassed
+                    ? 'border-emerald-200 bg-emerald-50/60 hover:bg-emerald-50'
+                    : s.notRun
+                    ? 'border-slate-200 bg-slate-50 hover:bg-slate-100'
+                    : 'border-red-200 bg-red-50/60 hover:bg-red-50'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  {s.allPassed ? (
+                    <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0" />
+                  ) : (
+                    <XCircle className={`w-5 h-5 shrink-0 ${s.notRun ? 'text-slate-400' : 'text-red-500'}`} />
+                  )}
+                  <div>
+                    <p className="font-black text-slate-800 text-sm">{s.title}</p>
+                    {s.notRun && (
+                      <p className="text-xs text-slate-400 font-medium">Não executado</p>
+                    )}
+                  </div>
+                </div>
+                <span
+                  className={`text-sm font-black px-3 py-1 rounded-full ${
+                    s.allPassed
+                      ? 'bg-emerald-100 text-emerald-700'
+                      : s.notRun
+                      ? 'bg-slate-100 text-slate-500'
+                      : 'bg-red-100 text-red-700'
+                  }`}
+                >
+                  {s.notRun ? '—' : `${s.passed}/${s.total}`}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {/* Actions */}
+          <div className="flex flex-col sm:flex-row gap-3 mt-6">
+            <button
+              onClick={() => setShowSummary(false)}
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-100 transition-all text-sm"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Continuar Editando
+            </button>
+            <button
+              onClick={handleDownloadCode}
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl border border-emerald-200 text-emerald-700 font-bold hover:bg-emerald-50 transition-all text-sm shadow-sm"
+            >
+              <Code2 className="w-4 h-4" />
+              Baixar Código
+            </button>
+            <button
+              onClick={handleDownloadExam}
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl border-none bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-all text-sm shadow-lg shadow-indigo-200"
+            >
+              <FileText className="w-4 h-4" />
+              Baixar JSON
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const editorContent = (
     <div className="h-full overflow-y-auto p-6 md:p-8 bg-white flex flex-col gap-6">
@@ -296,17 +464,17 @@ export default function CreatePage() {
               <Plus className="w-4 h-4 inline mr-1" /> Novo Problema
             </button>
             <button
-              onClick={handleDownloadExam}
+              onClick={() => setShowSummary(true)}
               disabled={!allProblemsPassed}
               className={`text-sm font-bold px-4 py-2 rounded-xl transition-all shadow-sm flex items-center gap-2 ${
                 allProblemsPassed 
                   ? 'bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-4 focus:ring-emerald-600/20' 
                   : 'bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300'
               }`}
-              title={allProblemsPassed ? 'Gerar Prova JSON' : 'Resolva todos os problemas para baixar'}
+              title={allProblemsPassed ? 'Resumo da Prova' : 'Resolva todos os problemas para gerar a prova'}
             >
-              <Download className="w-4 h-4 shrink-0" />
-              <span className="hidden sm:inline">Gerar Prova</span>
+              <CheckCircle className="w-4 h-4 shrink-0" />
+              <span className="hidden sm:inline">Revisar</span>
             </button>
           </div>
         </div>

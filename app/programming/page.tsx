@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { Code2, ChevronLeft, Upload, FileText, CheckCircle, XCircle, Trophy, RotateCcw, Download } from 'lucide-react';
 import ProblemViewer from '@/components/programming/ProblemViewer';
-import { strToU8, gzipSync } from 'fflate';
+import { downloadCodeArchive } from '@/lib/programming';
 import type { TestResult } from '@/components/programming/CodeRunner';
 import type { ProblemSet } from '@/types/programming';
 
@@ -14,121 +14,6 @@ function makeStorageKey(title: string): string {
     .replace(/[^a-z0-9]+/g, '_')
     .replace(/^_|_$/g, '')
     .slice(0, 40);
-}
-
-// ─── Formatting helper ────────────────────────────────────────────────────
-function formatPythonComment(title: string, description: string): string {
-  const MAX_LEN = 120;
-  const prefix = '# ';
-  
-  const breakText = (text: string) => {
-    if (!text) return '#';
-    const lines = text.replace(/\r\n/g, '\n').split('\n');
-    const result: string[] = [];
-    
-    for (const line of lines) {
-      if (line.trim().length === 0) {
-        result.push('#');
-        continue;
-      }
-      if (prefix.length + line.length <= MAX_LEN) {
-        result.push(prefix + line);
-        continue;
-      }
-      
-      let currentLine = prefix;
-      const words = line.split(' ');
-      
-      for (const word of words) {
-        if (!word) continue;
-        if (currentLine === prefix) {
-          currentLine += word;
-        } else if (currentLine.length + 1 + word.length <= MAX_LEN) {
-          currentLine += ' ' + word;
-        } else {
-          result.push(currentLine);
-          currentLine = prefix + word;
-        }
-      }
-      if (currentLine !== prefix) {
-        result.push(currentLine);
-      }
-    }
-    return result.join('\n');
-  };
-
-  return `${breakText(title)}\n#\n${breakText(description)}\n\n`;
-}
-
-// ─── Tar creation helper ──────────────────────────────────────────────────
-function createTarArchive(files: { name: string; content: string }[]): Uint8Array {
-  // A standard tar block is 512 bytes.
-  // We'll calculate the total size: 512 bytes for each header + blocks for the file content + 2 empty blocks at the end
-  let totalSize = 0;
-  for (const file of files) {
-    const contentBytes = strToU8(file.content);
-    const contentBlocks = Math.ceil(contentBytes.length / 512);
-    totalSize += 512 + contentBlocks * 512;
-  }
-  totalSize += 1024; // 2 end blocks
-
-  const out = new Uint8Array(totalSize);
-  let offset = 0;
-
-  for (const file of files) {
-    const contentBytes = strToU8(file.content);
-    // Write header
-    const header = new Uint8Array(512);
-    
-    // File name (100 octets)
-    const nameBytes = strToU8(file.name);
-    header.set(nameBytes.subarray(0, 100), 0);
-    
-    // File mode (8 octets, octal)
-    const mode = '0000644\0';
-    header.set(strToU8(mode), 100);
-    
-    // Owner's numeric user ID (8 octets, octal)
-    const uid = '0001750\0';
-    header.set(strToU8(uid), 108);
-    
-    // Group's numeric user ID (8 octets, octal)
-    const gid = '0001750\0';
-    header.set(strToU8(gid), 116);
-    
-    // File size (12 octets, octal)
-    let sizeStr = contentBytes.length.toString(8);
-    sizeStr = sizeStr.padStart(11, '0') + '\0';
-    header.set(strToU8(sizeStr), 124);
-    
-    // Last modification time (12 octets, octal)
-    const mtime = Math.floor(Date.now() / 1000).toString(8);
-    header.set(strToU8(mtime.padStart(11, '0') + '\0'), 136);
-    
-    // Checksum for header block (8 octets, space padded initially to calculate)
-    header.set(strToU8('        '), 148);
-    
-    // Link indicator (typeflag) (1 octet) - '0' for normal file
-    header[156] = 48;
-
-    // Calculate checksum
-    let checksum = 0;
-    for (let i = 0; i < 512; i++) {
-      checksum += header[i];
-    }
-    const checksumStr = checksum.toString(8).padStart(6, '0') + '\0 ';
-    header.set(strToU8(checksumStr), 148);
-
-    out.set(header, offset);
-    offset += 512;
-
-    // Write content
-    out.set(contentBytes, offset);
-    offset += Math.ceil(contentBytes.length / 512) * 512; // advance to next block boundary
-  }
-
-  // The remaining 1024 bytes are already 0, marking the end of the archive
-  return out;
 }
 
 export default function ProgrammingPage() {
@@ -186,43 +71,7 @@ export default function ProgrammingPage() {
 
   const handleDownloadCode = () => {
     if (!problemSet) return;
-    
-    const files = problemSet.problems.map((p, i) => {
-      const storageKeyForCode = `prog_code_${storageKey}_${i}`;
-      let code = '';
-      try {
-        const raw = localStorage.getItem(storageKeyForCode);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (typeof parsed === 'string') {
-            code = parsed;
-          }
-        }
-      } catch {
-        // use empty string if cannot read
-      }
-      return {
-        name: `${p.title}.py`,
-        content: formatPythonComment(p.title, p.description) + code
-      };
-    });
-
-    const tarBytes = createTarArchive(files);
-    const gzipped = gzipSync(tarBytes);
-    
-    const blob = new Blob([gzipped as globalThis.BlobPart], { type: 'application/gzip' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    const safeTitle = problemSet.title.replace(/[^A-Za-z0-9_-]/g, '_');
-    a.download = `${safeTitle}-codigo.tar.gz`;
-    document.body.appendChild(a);
-    a.click();
-    
-    setTimeout(() => {
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }, 100);
+    downloadCodeArchive(problemSet.title, `prog_code_${storageKey}`, problemSet.problems);
   };
 
   // ─── Summary screen ───────────────────────────────────────────────────────
