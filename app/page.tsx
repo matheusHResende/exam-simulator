@@ -1,10 +1,10 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { BookOpen, Code2 } from 'lucide-react';
+import { BookOpen, Code2, PenLine } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Início | Simulador de Provas e Programação',
-  description: 'Bem-vindo ao simulador de provas. Escolha entre simulador de questões e provas de programação.',
+  description: 'Bem-vindo ao simulador de provas. Escolha entre simulador de questões, provas de programação e crie seus próprios simulados.',
 };
 
 export default function Home() {
@@ -22,7 +22,7 @@ export default function Home() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl w-full">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 max-w-5xl w-full">
         {/* Exam card */}
         <Link
           href="/exam"
@@ -77,6 +77,25 @@ export default function Home() {
           </p>
           <span className="mt-6 inline-block bg-emerald-600 group-hover:bg-emerald-700 text-white text-xs font-black px-5 py-2 rounded-full transition-colors">
             Praticar →
+          </span>
+        </Link>
+
+        {/* Create exam card */}
+        <Link
+          href="/exam/create"
+          className="group bg-white p-8 rounded-3xl shadow-sm border border-slate-200 hover:border-indigo-400 hover:shadow-xl hover:shadow-indigo-100 transition-all duration-300 flex flex-col items-center text-center"
+        >
+          <div className="w-16 h-16 bg-indigo-50 group-hover:bg-indigo-600 rounded-2xl flex items-center justify-center mb-6 transition-colors duration-300">
+            <PenLine className="w-8 h-8 text-indigo-600 group-hover:text-white transition-colors duration-300" />
+          </div>
+          <h2 className="text-xl font-black text-slate-900 mb-2 group-hover:text-indigo-700 transition-colors">
+            Criar Simulado
+          </h2>
+          <p className="text-slate-500 text-sm leading-relaxed">
+            Monte questões de múltipla escolha do zero e exporte um CSV pronto para usar no simulador.
+          </p>
+          <span className="mt-6 inline-block bg-indigo-600 group-hover:bg-indigo-700 text-white text-xs font-black px-5 py-2 rounded-full transition-colors">
+            Criar →
           </span>
         </Link>
       </div>
