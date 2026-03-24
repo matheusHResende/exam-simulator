@@ -2,11 +2,12 @@
 
 import { useEffect, useRef, useState, useCallback, forwardRef, useImperativeHandle } from 'react';
 import Editor from '@monaco-editor/react';
-import { CheckCircle, XCircle, AlertTriangle, Play, Loader2 } from 'lucide-react';
+import { CheckCircle, XCircle, AlertTriangle, Play, Loader2, Square } from 'lucide-react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import type { TestCase, TestResult } from '@/types/programming';
 import { getPyodide, runPythonCode, type PyodideInstance } from '@/lib/pyodide';
 import { makeCodeKey, makeResultsKey, loadFromStorage, saveToStorage } from '@/lib/storage';
+import { ScriptError } from './ScriptError';
 
 interface CodeRunnerProps {
   testCases: TestCase[];
@@ -34,6 +35,7 @@ const CodeRunner = forwardRef<CodeRunnerRef, CodeRunnerProps>(({ testCases, prob
   const [loadingPyodide, setLoadingPyodide] = useState(false);
   const [globalError, setGlobalError] = useState('');
   const prevIndexRef = useRef(problemIndex);
+  const pyodideRef = useRef<PyodideInstance | null>(null);
 
   // Sync state upward when it changes
   useEffect(() => {
@@ -75,6 +77,7 @@ const CodeRunner = forwardRef<CodeRunnerRef, CodeRunnerProps>(({ testCases, prob
     try {
       setLoadingPyodide(true);
       pyodide = await getPyodide();
+      pyodideRef.current = pyodide;
       setLoadingPyodide(false);
     } catch (e: unknown) {
       setGlobalError(e instanceof Error ? e.message : 'Erro ao carregar o interpretador Python.');
@@ -103,6 +106,7 @@ const CodeRunner = forwardRef<CodeRunnerRef, CodeRunnerProps>(({ testCases, prob
           expectedOutput: tc.expectedOutput.trimEnd(),
           error: msg,
         });
+        break;
       }
     }
 
@@ -110,7 +114,15 @@ const CodeRunner = forwardRef<CodeRunnerRef, CodeRunnerProps>(({ testCases, prob
     saveToStorage(resultsKey, newResults);
     onResultsChange?.(newResults);
     setIsRunning(false);
+    pyodideRef.current = null;
   }, [code, testCases, resultsKey, onResultsChange]);
+
+  const handleStop = useCallback(() => {
+    if (pyodideRef.current) {
+      pyodideRef.current.terminate();
+      pyodideRef.current = null;
+    }
+  }, []);
 
   const runActionRef = useRef<() => void>(() => {});
   useEffect(() => {
@@ -131,8 +143,9 @@ const CodeRunner = forwardRef<CodeRunnerRef, CodeRunnerProps>(({ testCases, prob
   }, [codeKey, resultsKey, onResultsChange]);
 
   const passCount = results?.filter((r) => r.passed).length ?? 0;
-  const totalCount = results?.length ?? 0;
-  const allPassed = results !== null && passCount === totalCount;
+  const totalCount = testCases.length;
+  const allPassed = results !== null && passCount === totalCount && totalCount > 0;
+  const firstError = results?.find((r) => r.error)?.error;
 
   useImperativeHandle(ref, () => ({
     runCode: handleRun,
@@ -148,28 +161,43 @@ const CodeRunner = forwardRef<CodeRunnerRef, CodeRunnerProps>(({ testCases, prob
           <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
             <span className="text-emerald-500 text-sm leading-none font-mono font-bold">&lt;/&gt;</span> Código (Python)
           </span>
-          <button
-            title="Atalho: Ctrl + Enter"
-            onClick={handleRun}
-            disabled={isRunning || testCases.length === 0}
-            className={`flex items-center gap-2 px-4 py-1.5 rounded-lg font-black text-xs transition-all shadow-sm ${
-              isRunning || testCases.length === 0
-                ? 'bg-violet-200 text-violet-400 cursor-not-allowed'
-                : 'bg-violet-600 text-white hover:bg-violet-700 shadow-violet-200'
-            }`}
-          >
-            {isRunning ? (
-              <>
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                {loadingPyodide ? 'Carregando…' : 'Executando…'}
-              </>
-            ) : (
-              <>
-                <Play className="w-3.5 h-3.5" />
-                Executar
-              </>
-            )}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              title="Parar Execução"
+              onClick={handleStop}
+              disabled={!isRunning}
+              className={`flex items-center gap-2 px-4 py-1.5 rounded-lg font-black text-xs transition-all shadow-sm ${
+                !isRunning
+                  ? 'bg-red-100 text-red-300 cursor-not-allowed opacity-70'
+                  : 'bg-red-600 text-white hover:bg-red-700 shadow-red-200'
+              }`}
+            >
+              <Square className="w-3.5 h-3.5 fill-current" />
+              Parar
+            </button>
+            <button
+              title="Atalho: Ctrl + Enter"
+              onClick={handleRun}
+              disabled={isRunning || testCases.length === 0}
+              className={`flex items-center gap-2 px-4 py-1.5 rounded-lg font-black text-xs transition-all shadow-sm ${
+                isRunning || testCases.length === 0
+                  ? 'bg-violet-200 text-violet-400 cursor-not-allowed'
+                  : 'bg-violet-600 text-white hover:bg-violet-700 shadow-violet-200'
+              }`}
+            >
+              {isRunning ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  {loadingPyodide ? 'Carregando…' : 'Executando…'}
+                </>
+              ) : (
+                <>
+                  <Play className="w-3.5 h-3.5" />
+                  Executar
+                </>
+              )}
+            </button>
+          </div>
         </div>
         <div className="flex-1">
           <Editor
@@ -224,6 +252,9 @@ const CodeRunner = forwardRef<CodeRunnerRef, CodeRunnerProps>(({ testCases, prob
           {/* Results */}
           {results && (
             <div className="space-y-3">
+              {/* Script Error */}
+              {firstError && <ScriptError error={firstError} />}
+
               {/* Summary badge */}
               <div
                 className={`flex items-center gap-3 p-4 rounded-2xl border font-black text-sm ${
@@ -283,10 +314,10 @@ const CodeRunner = forwardRef<CodeRunnerRef, CodeRunnerProps>(({ testCases, prob
                         </p>
                         <pre
                           className={`text-sm font-mono whitespace-pre-wrap break-all ${
-                            r.error ? 'text-red-600' : 'text-slate-800'
+                            r.error ? 'text-red-500 italic' : 'text-slate-800'
                           }`}
                         >
-                          {r.error || r.actualOutput || '(vazio)'}
+                          {r.error ? '(erro de execução)' : (r.actualOutput || '(vazio)')}
                         </pre>
                       </div>
                     </div>

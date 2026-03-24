@@ -1,113 +1,88 @@
-declare global {
-  interface Window {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    loadPyodide: (opts: { indexURL: string }) => Promise<any>;
-    _pyodideInstance: PyodideInstance | null;
+export class PyodideWorkerManager {
+  private worker: Worker | null = null;
+  private messageId = 0;
+  private callbacks = new Map<
+    number,
+    { resolve: (val: any) => void; reject: (err: any) => void }
+  >();
+
+  async init(): Promise<void> {
+    if (!this.worker) {
+      // NOTE: Next.js supports this Webpack 5 syntax natively
+      this.worker = new Worker(new URL('./pyodide.worker.ts', import.meta.url));
+      
+      this.worker.onmessage = (e) => {
+        const { id, type, stdout, stderr, error } = e.data;
+        const callback = this.callbacks.get(id);
+        
+        if (callback) {
+          if (type === 'RUN_DONE') {
+            callback.resolve({ stdout, stderr });
+          } else if (type === 'INIT_DONE') {
+            callback.resolve(undefined);
+          } else {
+            callback.reject(new Error(error));
+          }
+          this.callbacks.delete(id);
+        }
+      };
+
+      this.worker.onerror = (err: ErrorEvent) => {
+        for (const cb of this.callbacks.values()) {
+          cb.reject(new Error('Worker error: ' + err.message));
+        }
+        this.callbacks.clear();
+      };
+    }
+    await this.postMessage('INIT');
+  }
+
+  runCode(code: string, input: string): Promise<{ stdout: string; stderr: string }> {
+    return this.postMessage('RUN', { code, input });
+  }
+
+  terminate() {
+    if (this.worker) {
+      this.worker.terminate();
+      this.worker = null;
+      for (const cb of this.callbacks.values()) {
+        cb.reject(new Error('Execução interrompida manualmente.'));
+      }
+      this.callbacks.clear();
+    }
+  }
+
+  private postMessage(type: string, payload: any = {}): Promise<any> {
+    return new Promise((resolve, reject) => {
+      if (!this.worker) {
+        return reject(new Error('Worker is not initialized.'));
+      }
+      const id = this.messageId++;
+      this.callbacks.set(id, { resolve, reject });
+      this.worker.postMessage({ type, id, ...payload });
+    });
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type PyodideInstance = any;
+export type PyodideInstance = PyodideWorkerManager;
 
-/**
- * Returns the shared Pyodide WebAssembly instance, loading it on demand.
- *
- * The Pyodide runtime (~10 MB) is fetched from the jsDelivr CDN the first
- * time this function is called and then cached on `window._pyodideInstance`.
- * Subsequent calls return the cached instance immediately.
- *
- * @throws {Error} If called outside a browser environment (e.g. during SSR).
- */
+let sharedManager: PyodideWorkerManager | null = null;
+
 export async function getPyodide(): Promise<PyodideInstance> {
   if (typeof window === 'undefined') {
     throw new Error('Pyodide can only be loaded in the browser');
   }
-
-  if (window._pyodideInstance) {
-    return window._pyodideInstance;
+  if (!sharedManager) {
+    sharedManager = new PyodideWorkerManager();
   }
-
-  if (!window.loadPyodide) {
-    await new Promise<void>((resolve, reject) => {
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/pyodide/v0.27.0/full/pyodide.js';
-      script.onload = () => resolve();
-      script.onerror = () => reject(new Error('Falha ao carregar o Pyodide.'));
-      document.head.appendChild(script);
-    });
-  }
-
-  const pyodide: PyodideInstance = await window.loadPyodide({
-    indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.27.0/full/',
-  });
-
-  window._pyodideInstance = pyodide;
-  return pyodide;
+  await sharedManager.init();
+  return sharedManager;
 }
 
-/**
- * Executes Python `code` in the provided Pyodide instance with the given
- * standard input and captures the output.
- *
- * **stdin simulation:** The input string is split on `\n` and injected via:
- * - A custom `builtins.input()` that pops one line at a time.
- * - An `io.StringIO` replacement of `sys.stdin` (for direct `sys.stdin.read`
- *   style code).
- *
- * **stdout capture:** `sys.stdout` is temporarily replaced with an
- * `io.StringIO` buffer; its value is returned after execution.
- *
- * @param pyodide - A loaded Pyodide instance (from {@link getPyodide}).
- * @param code    - The Python source code to execute.
- * @param input   - The full stdin string (newline-separated test-case input).
- * @returns An object with `stdout` (captured output) and `stderr` (error text).
- */
 export async function runPythonCode(
-  pyodide: PyodideInstance,
+  manager: PyodideInstance,
   code: string,
   input: string
 ): Promise<{ stdout: string; stderr: string }> {
-  const lines = input.split('\n');
-  const escaped = JSON.stringify(lines);
-
-  const wrapper = `
-import sys, io
-
-_lines = ${escaped}
-_line_idx = 0
-
-def _fake_input(prompt=''):
-    global _line_idx
-    if _line_idx < len(_lines):
-        val = _lines[_line_idx]
-        _line_idx += 1
-        return val
-    return ''
-
-_stdout_buf = io.StringIO()
-_original_stdout = sys.stdout
-sys.stdout = _stdout_buf
-sys.stdin = io.StringIO(${JSON.stringify(input)})
-__builtins__.input = _fake_input
-
-try:
-${code
-  .split('\n')
-  .map((l) => '    ' + l)
-  .join('\n')}
-finally:
-    sys.stdout = _original_stdout
-
-_stdout_buf.getvalue()
-`;
-
-  let stderr = '';
-  pyodide.setStderr({
-    batched: (s: string) => {
-      stderr += s + '\n';
-    },
-  });
-
-  const result: string = await pyodide.runPythonAsync(wrapper);
-  return { stdout: result ?? '', stderr };
+  return manager.runCode(code, input);
 }
