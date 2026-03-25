@@ -199,7 +199,7 @@ const CodeRunner = forwardRef<CodeRunnerRef, CodeRunnerProps>(({ testCases, prob
             </button>
           </div>
         </div>
-        <div className="flex-1">
+        <div className="flex-1 min-h-0">
           <Editor
             height="100%"
             defaultLanguage="python"
