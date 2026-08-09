@@ -62,7 +62,7 @@ function parseCSV(text: string): Question[] {
     if (parts.length < 3) continue;
     const options = cleanField(parts[1])
       .split(';')
-      .map((opt) => opt.replace(/^[A-D]\)\s*/i, '').trim())
+      .map((opt) => opt.replace(/^[A-Z]\)\s*/i, '').trim())
       .filter((opt) => opt !== '');
     data.push({
       question: cleanField(parts[0]),
@@ -189,9 +189,9 @@ export default function ExamPage() {
   if (status === 'history') {
     const avgScore = examHistory.length
       ? Math.round(
-          examHistory.reduce((acc, curr) => acc + curr.percentage, 0) /
-            examHistory.length,
-        )
+        examHistory.reduce((acc, curr) => acc + curr.percentage, 0) /
+        examHistory.length,
+      )
       : 0;
 
     return (
@@ -305,11 +305,10 @@ export default function ExamPage() {
               >
                 <div className="flex items-center">
                   <div
-                    className={`w-12 h-12 rounded-xl flex items-center justify-center mr-4 ${
-                      test.percentage >= 70
-                        ? 'bg-green-50 text-green-600'
-                        : 'bg-amber-50 text-amber-600'
-                    }`}
+                    className={`w-12 h-12 rounded-xl flex items-center justify-center mr-4 ${test.percentage >= 70
+                      ? 'bg-green-50 text-green-600'
+                      : 'bg-amber-50 text-amber-600'
+                      }`}
                   >
                     <span className="font-black text-sm">{test.percentage}%</span>
                   </div>
@@ -324,11 +323,10 @@ export default function ExamPage() {
                 </div>
                 <div className="flex items-center gap-3">
                   <div
-                    className={`text-xs font-black px-3 py-1 rounded-full ${
-                      test.percentage >= 70
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-amber-100 text-amber-700'
-                    }`}
+                    className={`text-xs font-black px-3 py-1 rounded-full ${test.percentage >= 70
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-amber-100 text-amber-700'
+                      }`}
                   >
                     {test.percentage >= 70 ? 'APROVADO' : 'REPROVADO'}
                   </div>
@@ -538,18 +536,16 @@ export default function ExamPage() {
                   <button
                     key={idx}
                     onClick={() => handleAnswer(idx)}
-                    className={`w-full text-left p-5 rounded-2xl border-2 transition-all flex items-center group ${
-                      isSelected
-                        ? 'border-indigo-600 bg-indigo-50 text-indigo-800 ring-4 ring-indigo-50'
-                        : 'border-slate-100 bg-white hover:border-slate-300 text-slate-600'
-                    }`}
+                    className={`w-full text-left p-5 rounded-2xl border-2 transition-all flex items-center group ${isSelected
+                      ? 'border-indigo-600 bg-indigo-50 text-indigo-800 ring-4 ring-indigo-50'
+                      : 'border-slate-100 bg-white hover:border-slate-300 text-slate-600'
+                      }`}
                   >
                     <span
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center font-black mr-4 flex-shrink-0 transition-colors ${
-                        isSelected
-                          ? 'bg-indigo-600 text-white'
-                          : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200'
-                      }`}
+                      className={`w-10 h-10 rounded-xl flex items-center justify-center font-black mr-4 flex-shrink-0 transition-colors ${isSelected
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200'
+                        }`}
                     >
                       {letter}
                     </span>
@@ -564,11 +560,10 @@ export default function ExamPage() {
             <button
               onClick={() => currentIndex > 0 && setCurrentIndex(currentIndex - 1)}
               disabled={currentIndex === 0}
-              className={`flex items-center shrink-0 px-4 sm:px-6 py-3 rounded-xl font-bold transition-all ${
-                currentIndex === 0
-                  ? 'text-slate-300 cursor-not-allowed'
-                  : 'text-slate-600 hover:bg-slate-100'
-              }`}
+              className={`flex items-center shrink-0 px-4 sm:px-6 py-3 rounded-xl font-bold transition-all ${currentIndex === 0
+                ? 'text-slate-300 cursor-not-allowed'
+                : 'text-slate-600 hover:bg-slate-100'
+                }`}
             >
               <ChevronLeft className="w-5 h-5 mr-1 sm:mr-2" /> <span className="hidden xs:inline">Anterior</span>
             </button>
@@ -579,11 +574,10 @@ export default function ExamPage() {
                   : setCurrentIndex(currentIndex + 1)
               }
               disabled={!userAnswers[currentIndex]}
-              className={`flex items-center shrink-0 px-5 sm:px-8 py-3 sm:py-4 rounded-xl font-black text-sm sm:text-base transition-all shadow-lg ${
-                !userAnswers[currentIndex]
-                  ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
-                  : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-200 transform hover:-translate-y-0.5'
-              }`}
+              className={`flex items-center shrink-0 px-5 sm:px-8 py-3 sm:py-4 rounded-xl font-black text-sm sm:text-base transition-all shadow-lg ${!userAnswers[currentIndex]
+                ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
+                : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-200 transform hover:-translate-y-0.5'
+                }`}
             >
               {currentIndex === currentQuiz.length - 1 ? 'Finalizar Prova' : 'Próxima Questão'}
               <ChevronRight className="w-5 h-5 ml-2" />
@@ -606,9 +600,8 @@ export default function ExamPage() {
           <div className="bg-white p-6 sm:p-10 md:p-16 rounded-[2rem] sm:rounded-[3rem] shadow-xl border border-slate-200 text-center mb-12 relative overflow-hidden">
             <div className={`absolute top-0 left-0 w-full h-3 ${passed ? 'bg-green-500' : 'bg-amber-500'}`} />
             <div
-              className={`w-28 h-28 rounded-3xl flex items-center justify-center mx-auto mb-8 transform rotate-3 ${
-                passed ? 'bg-green-100 text-green-600' : 'bg-amber-100 text-amber-600'
-              }`}
+              className={`w-28 h-28 rounded-3xl flex items-center justify-center mx-auto mb-8 transform rotate-3 ${passed ? 'bg-green-100 text-green-600' : 'bg-amber-100 text-amber-600'
+                }`}
             >
               <Award className="w-16 h-16" />
             </div>
